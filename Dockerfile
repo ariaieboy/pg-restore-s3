@@ -1,5 +1,7 @@
 FROM ubuntu:22.04
 LABEL maintainer="AriaieBOY <ariaieboy.ir@gmail.com>"
+ENV DEBIAN_FRONTEND noninteractive
+ENV TZ=UTC
 
 RUN apt-get update
 RUN apt-get -y install wget gnupg
