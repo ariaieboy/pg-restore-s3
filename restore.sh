@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 
 if [ "${S3_ACCESS_KEY_ID}" = "**None**" ]; then
   echo "You need to set the S3_ACCESS_KEY_ID environment variable."
