@@ -1,4 +1,7 @@
-#! /bin/bash
+#! /bin/sh
+
+set -eo pipefail
+set -o pipefail
 
 if [ "${S3_ACCESS_KEY_ID}" = "**None**" ]; then
   echo "You need to set the S3_ACCESS_KEY_ID environment variable."
@@ -40,7 +43,7 @@ if [ "${POSTGRES_PASSWORD}" = "**None**" ]; then
   exit 1
 fi
 
-if [[ "${S3_ENDPOINT}" == "**None**" ]]; then
+if [ "${S3_ENDPOINT}" == "**None**" ]; then
   AWS_ARGS=""
 else
   AWS_ARGS="--endpoint-url ${S3_ENDPOINT}"
@@ -60,10 +63,10 @@ LATEST_BACKUP=$(aws $AWS_ARGS s3 ls s3://$S3_BUCKET/$S3_PREFIX/ | sort | tail -n
 
 echo "Fetching ${LATEST_BACKUP} from S3"
 
-aws $AWS_ARGS s3 cp s3://${S3_BUCKET}/${S3_PREFIX}/${LATEST_BACKUP} dump.sql.gz
+aws $AWS_ARGS s3 cp s3://$S3_BUCKET/$S3_PREFIX/${LATEST_BACKUP} dump.sql.gz
 gzip -d dump.sql.gz
 
-if [ "${DROP_PUBLIC}" = "yes" ]; then
+if [ "${DROP_PUBLIC}" == "yes" ]; then
 	echo "Recreating the public schema"
 	psql $POSTGRES_HOST_OPTS -d $POSTGRES_DATABASE -c "drop schema public cascade; create schema public;"
 fi
