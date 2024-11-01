@@ -56,21 +56,28 @@ POSTGRES_HOST_OPTS="-h $POSTGRES_HOST -p $POSTGRES_PORT -U $POSTGRES_USER"
 
 echo "Finding latest backup"
 
-LATEST_BACKUP=$(aws $AWS_ARGS s3 ls s3://$S3_BUCKET/$S3_PREFIX/ | sort | tail -n 1 | awk '{ print $4 }')
-
+if [[ -n $S3_PREFIX ]]; then
+  S3_URL="s3://$S3_BUCKET"
+else
+  S3_URL="s3://$S3_BUCKET/$S3_PREFIX/"
+fi
+LATEST_BACKUP=$(aws $AWS_ARGS s3 ls $S3_URL | sort | tail -n 1 | awk '{ print $4 }')
+if [[ -n $LATEST_BACKUP ]]; then
+    echo "error getting the latest backup name"
+    exit 1
+fi
 echo "Fetching $LATEST_BACKUP from S3"
 
-aws $AWS_ARGS s3 cp s3://$S3_BUCKET/$S3_PREFIX/$LATEST_BACKUP dump.sql.gz
+aws $AWS_ARGS s3 cp $S3_URL/$LATEST_BACKUP dump.sql.gz
 gzip -d dump.sql.gz
 
 if [[ "$DROP_PUBLIC" == "yes" ]]; then
-	echo "Recreating the public schema"
-	psql $POSTGRES_HOST_OPTS -d $POSTGRES_DATABASE -c "drop schema public cascade; create schema public;"
+  echo "Recreating the public schema"
+  psql $POSTGRES_HOST_OPTS -d $POSTGRES_DATABASE -c "drop schema public cascade; create schema public;"
 fi
 
 echo "Restoring $LATEST_BACKUP"
 
-psql $POSTGRES_HOST_OPTS -d $POSTGRES_DATABASE < dump.sql
+psql $POSTGRES_HOST_OPTS -d $POSTGRES_DATABASE <dump.sql
 
 echo "Restore complete"
-
