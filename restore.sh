@@ -39,7 +39,8 @@ if [ "${POSTGRES_PASSWORD}" = "**None**" ]; then
   echo "You need to set the POSTGRES_PASSWORD environment variable or link to a container named POSTGRES."
   exit 1
 fi
-if [ "${S3_ENDPOINT}" = "**None**" ]; then
+
+if [[ "${S3_ENDPOINT}" == "**None**" ]]; then
   AWS_ARGS=""
 else
   AWS_ARGS="--endpoint-url ${S3_ENDPOINT}"
