@@ -56,13 +56,13 @@ POSTGRES_HOST_OPTS="-h $POSTGRES_HOST -p $POSTGRES_PORT -U $POSTGRES_USER"
 
 echo "Finding latest backup"
 
-if [[ -n $S3_PREFIX ]]; then
+if [[ -z $S3_PREFIX ]]; then
   S3_URL="s3://$S3_BUCKET"
 else
   S3_URL="s3://$S3_BUCKET/$S3_PREFIX/"
 fi
 LATEST_BACKUP=$(aws $AWS_ARGS s3 ls $S3_URL | sort | tail -n 1 | awk '{ print $4 }')
-if [[ -n $LATEST_BACKUP ]]; then
+if [[ -z $LATEST_BACKUP ]]; then
     echo "error getting the latest backup name"
     exit 1
 fi
